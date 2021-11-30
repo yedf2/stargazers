@@ -50,12 +50,12 @@ func (app *App) ListChatGroup(title string) {
 
 }
 
-func (app *App) Send(receiver, receiverEmail, chatId, text string) error {
+func (app *App) Send(receiver, receiverEmail, receiverChatId, text string) error {
 	payload, err := json.Marshal(Message{
 		UserId:  receiver,
 		Email:   receiverEmail,
 		MsgType: messageType,
-		ChatId:  chatId,
+		ChatId:  receiverChatId,
 		Content: content{
 			Text: text,
 		},
@@ -63,7 +63,6 @@ func (app *App) Send(receiver, receiverEmail, chatId, text string) error {
 	if err != nil {
 		return err
 	}
-
 	_, err = message.Send(app.app, payload)
 	return err
 }
