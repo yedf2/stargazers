@@ -3,5 +3,8 @@ repo: <github repo like tal-tech/go-zero>
 feishu:
   appId: <app id>
   appSecret: <app secret>
+
+  ## exactly one of the following setting should be set
   receiver: <receiver's feishu UserID>
   receiver_email: <receiver's feishu Email>
+  receiver_chat_id: <receiver's feishu ChatId> # you can abtain chat_id by running 'stargazers list_chat'

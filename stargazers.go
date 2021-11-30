@@ -2,7 +2,9 @@ package main
 
 import (
 	"flag"
+	"fmt"
 	"log"
+	"os"
 	"time"
 
 	"stargazers/feishu"
@@ -15,10 +17,11 @@ var configFile = flag.String("f", "config.yaml", "the config file")
 
 type (
 	Feishu struct {
-		AppId         string `json:"appId"`
-		AppSecret     string `json:"appSecret"`
-		Receiver      string `json:"receiver,optional"`
-		ReceiverEmail string `json:"receiver_email,optional=!receiver"`
+		AppId          string `json:"appId"`
+		AppSecret      string `json:"appSecret"`
+		Receiver       string `json:"receiver,optional"`
+		ReceiverEmail  string `json:"receiver_email,optional"`
+		ReceiverChatId string `json:"receiver_chat_id,optional`
 	}
 
 	Config struct {
@@ -35,8 +38,22 @@ func main() {
 	var c Config
 	conf.MustLoad(*configFile, &c)
 
-	mon := gh.NewMonitor(c.Repo, c.Token, c.Interval, func(text string) error {
-		return feishu.Send(c.Feishu.AppId, c.Feishu.AppSecret, c.Feishu.Receiver, c.Feishu.ReceiverEmail, text)
-	})
-	log.Fatal(mon.Start())
+	app := feishu.NewApp(c.Feishu.AppId, c.Feishu.AppSecret)
+
+	if len(os.Args) > 1 && os.Args[1] == "list_chat" {
+		app.ListChatGroup(os.Args[1])
+	} else if len(os.Args) > 1 && os.Args[1] == "monitor" {
+		mon := gh.NewMonitor(c.Repo, c.Token, c.Interval, func(text string) error {
+			return app.Send(c.Feishu.Receiver, c.Feishu.ReceiverEmail, c.Feishu.ReceiverChatId, text)
+		})
+		log.Fatal(mon.Start())
+	} else {
+		fmt.Printf(`usage:
+		stargazers <command>
+
+The commands are:
+		list_chat:		list the chats including the robot.
+		monitor:			monitor the repo stargazers.
+`)
+	}
 }
